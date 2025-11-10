@@ -1,87 +1,88 @@
-  export const runtime = 'nodejs';
+export const runtime = 'nodejs';
 
-  import { NextResponse } from 'next/server';
-  import { prisma } from '@/lib/prisma'; // Our central prisma client
-  import { GoogleGenerativeAI } from '@google/generative-ai';
-  // We have removed pdf-parse and mammoth
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import OpenAI from 'openai'; // <-- NEW SDK
 
-  // Initialize the Gemini AI Client
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Initialize the OpenAI Client to point to OpenRouter
+const openai = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1', // <-- THIS IS THE KEY
+});
 
-  /**
-   * Helper function to get text from the text input
-   */
-  async function getSideContent(
-    formData: FormData,
-    textKey: string, // 'textA' or 'textB'
-  ): Promise<string> {
-    const text = formData.get(textKey) as string | null;
-    return text || ''; // If no text, just return empty string
-  }
+async function getSideContent(
+  formData: FormData,
+  textKey: string,
+): Promise<string> {
+  const text = formData.get(textKey) as string | null;
+  return text || '';
+}
 
-  // This is the main POST handler for our API route
-  export async function POST(req: Request) {
-    try {
-      const formData = await req.formData();
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData();
 
-      // 1. EXTRACT TEXT FROM INPUTS
-      // This logic is now inside the POST function
-      // and only calls for 'textA' and 'textB'
-      const [contentA, contentB] = await Promise.all([
-        getSideContent(formData, 'textA'),
-        getSideContent(formData, 'textB'),
-      ]);
+    const [contentA, contentB] = await Promise.all([
+      getSideContent(formData, 'textA'),
+      getSideContent(formData, 'textB'),
+    ]);
 
-      if (!contentA && !contentB) {
-        return NextResponse.json(
-          { error: 'No content provided for either side.' },
-          { status: 400 },
-        );
-      }
-
-      // 2. CALL THE GEMINI API FOR THE INITIAL VERDICT
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const prompt = `
-        You are an AI Judge for a mock trial. Analyze the evidence from Side A and Side B and provide an initial, impartial verdict.
-        Explain your reasoning clearly.
-
-        --- START SIDE A EVIDENCE ---
-        ${contentA}
-        --- END SIDE A EVIDENCE ---
-
-        --- START SIDE B EVIDENCE ---
-        ${contentB}
-        --- END SIDE B EVIDENCE ---
-
-        Your Verdict:
-      `;
-
-      const result = await model.generateContent(prompt);
-      const verdict = result.response.text();
-
-      // 3. SAVE EVERYTHING TO THE DATABASE IN A SINGLE TRANSACTION
-      const newCase = await prisma.case.create({
-        data: {
-          verdict: verdict, // The AI's verdict
-          documents: {
-            create: [
-              { side: 'A', content: contentA },
-              { side: 'B', content: contentB },
-            ],
-          },
-        },
-      });
-
-      // 4. RETURN THE NEW CASE ID AND VERDICT TO THE FRONTEND
-      return NextResponse.json({
-        caseId: newCase.id,
-        verdict: newCase.verdict,
-      });
-    } catch (error) {
-      console.error('Error in /api/case POST:', error);
+    if (!contentA && !contentB) {
       return NextResponse.json(
-        { error: 'An internal server error occurred.' },
-        { status: 500 },
+        { error: 'No content provided for either side.' },
+        { status: 400 },
       );
     }
+
+    // 2. CALL THE OPENROUTER API (using a free model)
+    // We'll use a fast, free model.
+    const model = 'mistralai/mistral-7b-instruct:free'; 
+    const prompt = `
+      You are an AI Judge for a mock trial. Analyze the evidence from Side A and Side B and provide an initial, impartial verdict.
+      Explain your reasoning clearly.
+
+      --- START SIDE A EVIDENCE ---
+      ${contentA}
+      --- END SIDE A EVIDENCE ---
+
+      --- START SIDE B EVIDENCE ---
+      ${contentB}
+      --- END SIDE B EVIDENCE ---
+
+      Your Verdict:
+    `;
+
+    // The OpenAI-compatible API call
+    const completion = await openai.chat.completions.create({
+      model: model,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const verdict = completion.choices[0].message.content; // <-- How to get text
+
+    // 3. SAVE TO DATABASE (this code is identical)
+    const newCase = await prisma.case.create({
+      data: {
+        verdict: verdict || 'No verdict received.', // Add a fallback
+        documents: {
+          create: [
+            { side: 'A', content: contentA },
+            { side: 'B', content: contentB },
+          ],
+        },
+      },
+    });
+
+    // 4. RETURN RESPONSE (this code is identical)
+    return NextResponse.json({
+      caseId: newCase.id,
+      verdict: newCase.verdict,
+    });
+  } catch (error) {
+    console.error('Error in /api/case POST:', error);
+    return NextResponse.json(
+      { error: 'An internal server error occurred.' },
+      { status: 500 },
+    );
   }
+}

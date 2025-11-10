@@ -105,7 +105,7 @@ function ArgumentChat({
                 ? 'bg-blue-600 ml-auto' // User's argument
                 : turn.from === 'AI'
                 ? 'bg-gray-600' // AI's response
-                : 'bg-red-600' // Opponent's argument (we filter this out, but good to have)
+                : 'bg-red-600' // Opponent's argument
             }`}
           >
             <strong className="block text-sm">
@@ -156,8 +156,6 @@ export default function HomePage() {
   const [verdict, setVerdict] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false); // For initial verdict
   const [error, setError] = useState<string | null>(null);
-
-  // This one state will hold the *entire* chat history for both sides
   const [argumentHistory, setArgumentHistory] = useState<ArgumentTurn[]>([]);
 
   // --- HANDLERS ---
@@ -193,10 +191,6 @@ export default function HomePage() {
     }
   };
 
-  /**
-   * This is the "callback" function we pass to the ArgumentChat components.
-   * It updates the *single* shared history, which causes both chats to re-render.
-   */
   const handleNewArgument = (
     userTurn: ArgumentTurn,
     aiResponse: ArgumentTurn,
@@ -208,15 +202,11 @@ export default function HomePage() {
     ]);
   };
 
-  // We consider the UI "locked" if the initial verdict is loading OR
-  // if the most recent argument was from 'A' or 'B' (i.e., we are waiting for an AI response)
-  // This is a simple way to prevent simultaneous submissions.
   const isArgumentLoading =
     isLoading ||
     (argumentHistory.length > 0 &&
       argumentHistory[argumentHistory.length - 1].from !== 'AI');
 
-  // Check if max arguments reached
   const maxArgumentsReached =
     argumentHistory.filter((turn) => turn.from !== 'AI').length >= 5;
 
@@ -244,19 +234,7 @@ export default function HomePage() {
                   disabled={!!caseId} // Disable after trial starts
                 />
               </div>
-              <div>
-                <label htmlFor="fileA" className="block text-sm font-medium">
-                  Evidence (File)
-                </label>
-                <input
-                  type="file"
-                  id="fileA"
-                  name="fileA"
-                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                  accept=".pdf,.txt"
-                  disabled={!!caseId} // Disable after trial starts
-                />
-              </div>
+              {/* FILE INPUT FOR SIDE A IS NOW REMOVED */}
             </div>
           </div>
 
@@ -308,26 +286,13 @@ export default function HomePage() {
                   disabled={!!caseId} // Disable after trial starts
                 />
               </div>
-              <div>
-                <label htmlFor="fileB" className="block text-sm font-medium">
-                  Evidence (File)
-                </label>
-                <input
-                  type="file"
-                  id="fileB"
-                  name="fileB"
-                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
-                  accept=".pdf,.docx,.txt"
-                  disabled={!!caseId} // Disable after trial starts
-                />
-              </div>
+              {/* FILE INPUT FOR SIDE B IS NOW REMOVED */}
             </div>
           </div>
         </div>
       </form>
 
       {/* --- POST-DECISION ARGUMENT SECTION --- */}
-      {/* This whole section only appears AFTER the initial trial is complete */}
       {caseId && (
         <div className="mt-8">
           {maxArgumentsReached && (
