@@ -2,27 +2,21 @@
 
 import { useState } from 'react';
 
-// === DEFINE OUR DATA STRUCTURES ===
 interface VerdictResponse {
   caseId: string;
   verdict: string;
 }
 
-// Represents one "turn" in the argument chat
 interface ArgumentTurn {
   from: 'A' | 'B' | 'AI';
   text: string;
 }
 
-// Represents the response from our /api/argue
 interface ArgueResponse {
   aiResponse: string;
   argumentFrom: 'A' | 'B';
 }
 
-/**
- * A reusable component for the argument/chat interface
- */
 function ArgumentChat({
   side,
   caseId,
@@ -34,7 +28,7 @@ function ArgumentChat({
   caseId: string;
   argumentHistory: ArgumentTurn[];
   onNewArgument: (newTurn: ArgumentTurn, aiResponse: ArgumentTurn) => void;
-  isLocked: boolean; // To lock the UI during loading
+  isLocked: boolean;
 }) {
   const [argumentText, setArgumentText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -63,27 +57,23 @@ function ArgumentChat({
 
       const data: ArgueResponse = await response.json();
 
-      // This is the user's argument
       const userTurn: ArgumentTurn = {
         from: data.argumentFrom,
         text: argumentText,
       };
 
-      // This is the AI's response
       const aiTurn: ArgumentTurn = {
         from: 'AI',
         text: data.aiResponse,
       };
 
-      // Send both new turns back up to the main page
       onNewArgument(userTurn, aiTurn);
-      setArgumentText(''); // Clear the input box
+      setArgumentText('');
     } catch (e: any) {
       setError(e.message);
     }
   };
 
-  // Dynamic colors for A vs B
   const accentColor = side === 'A' ? 'blue' : 'red';
 
   return (
@@ -92,7 +82,6 @@ function ArgumentChat({
         Arguments (Side {side})
       </h3>
 
-      {/* CHAT HISTORY */}
       <div className="flex-grow bg-gray-700 p-4 rounded-md overflow-y-auto mb-4 space-y-4">
         {argumentHistory.length === 0 && (
           <p className="text-gray-400 text-center">No arguments yet.</p>
@@ -102,10 +91,10 @@ function ArgumentChat({
             key={index}
             className={`p-3 rounded-lg max-w-[85%] ${
               turn.from === side
-                ? 'bg-blue-600 ml-auto' // User's argument
+                ? 'bg-blue-600 ml-auto'
                 : turn.from === 'AI'
-                ? 'bg-gray-600' // AI's response
-                : 'bg-red-600' // Opponent's argument
+                ? 'bg-gray-600'
+                : 'bg-red-600'
             }`}
           >
             <strong className="block text-sm">
@@ -116,14 +105,12 @@ function ArgumentChat({
         ))}
       </div>
 
-      {/* ERROR DISPLAY */}
       {error && (
         <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-2 rounded-md mb-2">
           <strong className="font-bold">Error:</strong> {error}
         </div>
       )}
 
-      {/* ARGUMENT INPUT FORM */}
       <form onSubmit={handleSubmit}>
         <textarea
           rows={3}
@@ -149,23 +136,20 @@ function ArgumentChat({
   );
 }
 
-// === THE MAIN PAGE COMPONENT ===
 export default function HomePage() {
-  // --- STATE ---
   const [caseId, setCaseId] = useState<string | null>(null);
   const [verdict, setVerdict] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false); // For initial verdict
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [argumentHistory, setArgumentHistory] = useState<ArgumentTurn[]>([]);
 
-  // --- HANDLERS ---
   const handleInitialSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
-    setArgumentHistory([]); // Clear old arguments on new trial
+    setArgumentHistory([]);
 
     const formData = new FormData(event.currentTarget);
 
@@ -215,9 +199,7 @@ export default function HomePage() {
       <h1 className="text-4xl font-bold text-center mb-10">AI Judge</h1>
 
       <form onSubmit={handleInitialSubmit}>
-        {/* --- INITIAL TRIAL SECTION --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* SIDE A */}
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold mb-4 text-blue-400">Side A</h2>
             <div className="space-y-4">
@@ -231,14 +213,12 @@ export default function HomePage() {
                   rows={10}
                   className="w-full p-2 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-blue-500"
                   placeholder="Paste text evidence..."
-                  disabled={!!caseId} // Disable after trial starts
+                  disabled={!!caseId}
                 />
               </div>
-              {/* FILE INPUT FOR SIDE A IS NOW REMOVED */}
             </div>
           </div>
 
-          {/* AI VERDICT */}
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col">
             <h2 className="text-2xl font-semibold mb-4 text-center text-yellow-400">
               AI Verdict
@@ -269,7 +249,6 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* SIDE B */}
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold mb-4 text-red-400">Side B</h2>
             <div className="space-y-4">
@@ -283,16 +262,14 @@ export default function HomePage() {
                   rows={10}
                   className="w-full p-2 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-red-500"
                   placeholder="Paste text evidence..."
-                  disabled={!!caseId} // Disable after trial starts
+                  disabled={!!caseId}
                 />
               </div>
-              {/* FILE INPUT FOR SIDE B IS NOW REMOVED */}
             </div>
           </div>
         </div>
       </form>
 
-      {/* --- POST-DECISION ARGUMENT SECTION --- */}
       {caseId && (
         <div className="mt-8">
           {maxArgumentsReached && (

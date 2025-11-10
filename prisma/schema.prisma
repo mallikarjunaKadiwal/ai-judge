@@ -1,14 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // <-- This uses Vercel's variable
-  directUrl = env("POSTGRES_URL_NON_POOLING") // <-- This uses Vercel's variable
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Case {
@@ -23,7 +20,7 @@ model Document {
   id        String   @id @default(cuid())
   caseId    String
   case      Case     @relation(fields: [caseId], references: [id])
-  side      String // "A" or "B"
+  side      String
   content   String   @db.Text
 }
 
@@ -31,7 +28,7 @@ model Argument {
   id        String   @id @default(cuid())
   caseId    String
   case      Case     @relation(fields: [caseId], references: [id])
-  side      String // "A" or "B"
+  side      String
   content   String   @db.Text
   createdAt DateTime @default(now())
 }

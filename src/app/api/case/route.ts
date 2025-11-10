@@ -2,12 +2,11 @@ export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import OpenAI from 'openai'; // <-- NEW SDK
+import OpenAI from 'openai';
 
-// Initialize the OpenAI Client to point to OpenRouter
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1', // <-- THIS IS THE KEY
+  baseURL: 'https://openrouter.ai/api/v1',
 });
 
 async function getSideContent(
@@ -34,8 +33,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. CALL THE OPENROUTER API (using a free model)
-    // We'll use a fast, free model.
     const model = 'mistralai/mistral-7b-instruct:free'; 
     const prompt = `
       You are an AI Judge for a mock trial. Analyze the evidence from Side A and Side B and provide an initial, impartial verdict.
@@ -52,18 +49,16 @@ export async function POST(req: Request) {
       Your Verdict:
     `;
 
-    // The OpenAI-compatible API call
     const completion = await openai.chat.completions.create({
       model: model,
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const verdict = completion.choices[0].message.content; // <-- How to get text
+    const verdict = completion.choices[0].message.content;
 
-    // 3. SAVE TO DATABASE (this code is identical)
     const newCase = await prisma.case.create({
       data: {
-        verdict: verdict || 'No verdict received.', // Add a fallback
+        verdict: verdict || 'No verdict received.',
         documents: {
           create: [
             { side: 'A', content: contentA },
@@ -73,7 +68,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // 4. RETURN RESPONSE (this code is identical)
     return NextResponse.json({
       caseId: newCase.id,
       verdict: newCase.verdict,

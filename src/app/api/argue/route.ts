@@ -2,13 +2,12 @@ export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import OpenAI from 'openai'; // <-- NEW SDK
+import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 
-// Initialize the OpenAI Client to point to OpenRouter
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1', // <-- THIS IS THE KEY
+  baseURL: 'https://openrouter.ai/api/v1',
 });
 
 interface ArgueRequest {
@@ -28,7 +27,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. FETCH CASE HISTORY (identical)
     const existingCase = await prisma.case.findUnique({
       where: { id: caseId },
       include: {
@@ -41,7 +39,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Case not found' }, { status: 404 });
     }
 
-    // 2. CHECK 5-ARGUMENT CONSTRAINT (identical)
     if (existingCase.arguments.length >= 5) {
       return NextResponse.json(
         { error: 'Maximum number of arguments (5) reached.' },
@@ -49,7 +46,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. SAVE NEW ARGUMENT (identical)
     await prisma.argument.create({
       data: {
         caseId: caseId,
@@ -58,11 +54,9 @@ export async function POST(req: Request) {
       },
     });
 
-    // 4. BUILD THE FULL CONTEXT PROMPT
     const originalDocA = existingCase.documents.find((d) => d.side === 'A')?.content || 'N/A';
     const originalDocB = existingCase.documents.find((d) => d.side === 'B')?.content || 'N/A';
     
-    // Create the message history
     const messages: ChatCompletionMessageParam[] = [
       {
         role: 'system',
@@ -78,27 +72,23 @@ export async function POST(req: Request) {
       },
     ];
 
-    // Add the previous chat history
     existingCase.arguments.forEach(arg => {
       messages.push({ role: 'user', content: `Argument from Side ${arg.side}: "${arg.content}"`});
     });
 
-    // Add the NEW argument
     messages.push({
       role: 'user',
       content: `Here is a new argument from Side ${side}: "${argumentText}". Please provide your re-evaluation.`
     });
 
-    // 5. CALL THE OPENROUTER API
     const model = 'mistralai/mistral-7b-instruct:free';
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: messages, // Send the whole history
+      messages: messages,
     });
 
     const aiResponse = completion.choices[0].message.content;
 
-    // 6. RETURN RESPONSE (identical)
     return NextResponse.json({
       aiResponse: aiResponse || 'No response received.',
       argumentFrom: side,
