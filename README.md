@@ -1,24 +1,38 @@
 🚀 AI Judge: SDE Intern Assignment
 This is a full-stack Next.js application built for the Vaquill SDE Intern assignment. It functions as a "mock trial" platform where two parties can submit evidence, receive an initial verdict from an AI judge, and then engage in a limited number of follow-up arguments, which the AI re-evaluates in real-time.
 
-1. Project Demo (Visual Walkthrough)
-Here is a visual walkthrough of the application's core functionality.
-**[Watch the Demo on Loom](https://www.loom.com/share/e59f3f8a5a014e89ad1cb61165b2cb10)**
+1. Project Demo
+Here is a video walkthrough of the complete project, from the initial verdict to the argument phase and code overview:
 
-1. Initial Trial & Verdict
+Watch the Demo on Loom
+
+2. Visual Walkthrough
+Here is a visual breakdown of the application's core functionality.
+
+2.1 Initial Trial & Verdict
 Users on "Side A" and "Side B" can paste their text evidence into the respective text areas.
+
+![Initial Trial UI](public/demo/ai.png)
 
 After clicking "Start Trial," the application contacts the AI, which returns an initial verdict in the center panel. The argument section now becomes visible.
 
-2. Argument & Re-evaluation
+![Verdict UI](public/demo/verdict.png)
+
+2.2 Argument & Re-evaluation
 Either side can now submit a follow-up argument. Here, Side A submits an argument.
+
+![Submitting an Argument](public/demo/arg_sub.png)
 
 After Side A submits, the AI "thinks again" and provides a re-evaluation. This new response appears in the chat history for both sides, ensuring transparency.
 
-3. Argument Limit
+![Re-evaluation UI](public/demo/re_eval.png)
+
+2.3 Argument Limit
 The application correctly enforces the 5-argument limit. After 5 total arguments are submitted, the input boxes are locked, and a message appears.
 
-2. How to Run This Project
+![Argument Limit UI](public/demo/arg_limit.png)
+
+3. How to Run This Project
 Clone this repository.
 
 Install dependencies:
@@ -48,7 +62,7 @@ Run the development server:
 Bash
 
 npm run dev
-3. Tech Stack
+4. Tech Stack
 Framework: Next.js (with TypeScript)
 
 Backend: Next.js API Routes (Node.js Runtime)
@@ -63,13 +77,13 @@ LLM API: OpenRouter (using the openai SDK and mistralai/mistral-7b-instruct:free
 
 Deployment: Vercel
 
-4. Key Development Decisions
+5. Key Development Decisions
 On Supporting Text-Only vs. File Uploads
 The initial goal was to support .pdf and .docx uploads. However, during development, I encountered deep-level bundler conflicts between file-parsing libraries (like pdf-parse and mammoth) and the Next.js Webpack environment. This resulted in critical, non-trivial runtime errors (TypeError: Object.defineProperty called on non-object) that are well-documented in the Next.js community.
 
-Rather than submit a non-functional project, I made the strategic engineering decision to pivot to a text-only system. This allowed me to deliver a robust, end-to-end, and fully functional application that still meets all core assignment objectives: a full-stack architecture, database integration, complex state management, and real-time LLM logic.
+Rather than submit a non-functional project, I made the strategic engineering decision to pivot to a text-only system (which I later expanded to include .txt files). This allowed me to deliver a robust, end-to-end, and fully functional application that still meets all core assignment objectives: a full-stack architecture, database integration, complex state management, and real-time LLM logic.
 
-5. Answers to Assignment Questions
+6. Answers to Assignment Questions
 1. UI/UX & Product Strategy
 UI: The UI is a clean 3-panel layout, with the "AI Judge" as the central focus. The "Argument" phase is intentionally hidden until an initial verdict is rendered, creating a clear, step-by-step user flow.
 
