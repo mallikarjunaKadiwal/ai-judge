@@ -7,25 +7,15 @@ Here is a visual walkthrough of the application's core functionality.
 1. Initial Trial & Verdict
 Users on "Side A" and "Side B" can paste their text evidence into the respective text areas.
 
-`` (Note: You will need to take a screenshot of your app, add it to your project, and update this link.)
-
 After clicking "Start Trial," the application contacts the AI, which returns an initial verdict in the center panel. The argument section now becomes visible.
-
-`` (Note: You will need to take a screenshot of your app, add it to your project, and update this link.)
 
 2. Argument & Re-evaluation
 Either side can now submit a follow-up argument. Here, Side A submits an argument.
 
-`` (Note: You will need to take a screenshot of your app, add it to your project, and update this link.)
-
 After Side A submits, the AI "thinks again" and provides a re-evaluation. This new response appears in the chat history for both sides, ensuring transparency.
-
-`` (Note: You will need to take a screenshot of your app, add it to your project, and update this link.)
 
 3. Argument Limit
 The application correctly enforces the 5-argument limit. After 5 total arguments are submitted, the input boxes are locked, and a message appears.
-
-`` (Note: You will need to take a screenshot of your app, add it to your project, and update this link.)
 
 2. How to Run This Project
 Clone this repository.
