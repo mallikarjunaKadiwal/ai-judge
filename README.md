@@ -84,6 +84,7 @@ The initial goal was to support .pdf and .docx uploads. However, during developm
 Rather than submit a non-functional project, I made the strategic engineering decision to pivot to a text-only system (which I later expanded to include .txt files). This allowed me to deliver a robust, end-to-end, and fully functional application that still meets all core assignment objectives: a full-stack architecture, database integration, complex state management, and real-time LLM logic.
 
 6. Answers to Assignment Questions
+  
 6.1 UI/UX & Product Strategy
 UI: The UI is a clean 3-panel layout, with the "AI Judge" as the central focus. The "Argument" phase is intentionally hidden until an initial verdict is rendered, creating a clear, step-by-step user flow.
 
