@@ -3,6 +3,7 @@ This is a full-stack Next.js application built for the Vaquill SDE Intern assign
 
 1. Project Demo (Visual Walkthrough)
 Here is a visual walkthrough of the application's core functionality.
+**[Watch the Demo on Loom](https://www.loom.com/share/e59f3f8a5a014e89ad1cb61165b2cb10)**
 
 1. Initial Trial & Verdict
 Users on "Side A" and "Side B" can paste their text evidence into the respective text areas.
