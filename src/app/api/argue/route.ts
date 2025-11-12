@@ -63,11 +63,11 @@ export async function POST(req: Request) {
         content: `You are an AI Judge who has already given an initial verdict.
           You must "think again" and re-evaluate your position based on new arguments.
           
-          --- ORIGINAL EVIDENCE & VERDICT ---
           Side A: ${originalDocA}
           Side B: ${originalDocB}
           Your Initial Verdict: ${existingCase.verdict}
-          --- END OF CONTEXT ---
+
+          Do not use any markdown formatting.
         `,
       },
     ];

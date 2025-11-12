@@ -153,6 +153,21 @@ export default function HomePage() {
 
     const formData = new FormData(event.currentTarget);
 
+    const fileA = formData.get('fileA') as File;
+    const textA = formData.get('textA') as string;
+    if (fileA && fileA.size > 0 && textA) {
+      setError('Side A: Please provide text *or* a file, not both.');
+      setIsLoading(false);
+      return;
+    }
+    const fileB = formData.get('fileB') as File;
+    const textB = formData.get('textB') as string;
+    if (fileB && fileB.size > 0 && textB) {
+      setError('Side B: Please provide text *or* a file, not both.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/case', {
         method: 'POST',
@@ -216,6 +231,20 @@ export default function HomePage() {
                   disabled={!!caseId}
                 />
               </div>
+              
+              <div>
+                <label htmlFor="fileA" className="block text-sm font-medium">
+                  Evidence (as .txt file)
+                </label>
+                <input
+                  type="file"
+                  id="fileA"
+                  name="fileA"
+                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                  accept=".txt"
+                  disabled={!!caseId}
+                />
+              </div>
             </div>
           </div>
 
@@ -236,12 +265,12 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-400"></div>
               </div>
             )}
-            {error && !verdict && (
+            {error && (
               <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-md">
                 <strong>Error:</strong> {error}
               </div>
             )}
-            {verdict && (
+            {verdict && !isLoading && (
               <div className="bg-gray-700 p-4 rounded-md h-[40vh] overflow-y-auto">
                 <h3 className="text-lg font-semibold mb-2">Initial Verdict</h3>
                 <p className="whitespace-pre-wrap">{verdict}</p>
@@ -262,6 +291,20 @@ export default function HomePage() {
                   rows={10}
                   className="w-full p-2 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-red-500"
                   placeholder="Paste text evidence..."
+                  disabled={!!caseId}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="fileB" className="block text-sm font-medium">
+                  Evidence (as .txt file)
+                </label>
+                <input
+                  type="file"
+                  id="fileB"
+                  name="fileB"
+                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer"
+                  accept=".txt"
                   disabled={!!caseId}
                 />
               </div>
